@@ -2,6 +2,7 @@ const asyncHandler = require("express-async-handler");
 const { processGetAllSections, processGetSectionById, processUpdateSectionById, processDeleteSectionById, processAddNewSection } = require("./section-service");
 
 const handleGetAllSections = asyncHandler(async (req, res) => {
+   
     const sections = await processGetAllSections();
     res.json({ sections });
 });
