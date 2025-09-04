@@ -1,3 +1,46 @@
+-- Restart sequences to consistent starting points
+ALTER SEQUENCE leave_status_id_seq RESTART WITH 1;
+ALTER SEQUENCE roles_id_seq RESTART WITH 1;
+ALTER SEQUENCE notice_status_id_seq RESTART WITH 1;
+ALTER SEQUENCE users_id_seq RESTART WITH 1;
+
+-- Insert into leave_status with explicit ids and conflict handling
+INSERT INTO leave_status (id, name) VALUES
+  (1, 'On Review'),
+  (2, 'Approved'),
+  (3, 'Cancelled')
+ON CONFLICT (id) DO NOTHING;
+
+-- Insert into roles with explicit ids and conflict handling
+INSERT INTO roles (id, name, is_editable) VALUES
+  (1, 'Admin', false),
+  (2, 'Teacher', false),
+  (3, 'Student', false)
+ON CONFLICT (id) DO NOTHING;
+
+-- Insert into notice_status with explicit ids and conflict handling
+INSERT INTO notice_status (id, name, alias) VALUES
+  (1, 'Draft', 'Draft'),
+  (2, 'Submit for Review', 'Approval Pending'),
+  (3, 'Submit for Deletion', 'Delete Pending'),
+  (4, 'Reject', 'Rejected'),
+  (5, 'Approve', 'Approved'),
+  (6, 'Delete', 'Deleted')
+ON CONFLICT (id) DO NOTHING;
+
+-- Insert users and capture id for related user_profiles insert
+WITH inserted_user AS (
+  INSERT INTO users(name,email,role_id,created_dt,password, is_active, is_email_verified)
+  VALUES('John Doe','admin@school-admin.com',1, now(),'$argon2id$v=19$m=65536,t=3,p=4$21a+bDbESEI60WO1wRKnvQ$i6OrxqNiHvwtf1Xg3bfU5+AXZG14fegW3p+RSMvq1oU', true, true)
+  ON CONFLICT (email) DO UPDATE SET email=EXCLUDED.email
+  RETURNING id
+)
+INSERT INTO user_profiles
+(user_id, gender, marital_status, phone, dob, join_dt, qualification, experience, current_address, permanent_address, father_name, mother_name, emergency_phone)
+SELECT id, 'Male', 'Married', '4759746607', '2024-08-05', NULL, NULL, NULL, NULL, NULL, 'stut', 'lancy', '79374304'
+FROM inserted_user;
+
+-- Insert access_controls with ON CONFLICT DO NOTHING to avoid duplicates
 INSERT INTO access_controls(
     name,
     path,
@@ -23,7 +66,6 @@ VALUES
 ('Reset password', '/api/v1/auth/reset-pwd', NULL, NULL, NULL, 'api', 'POST'),
 -- end auth
 
-
 -- start leave
 ('Leave', 'leave_parent', 'leave.svg', NULL, 2, 'menu-screen', NULL),
 ('Leave Define', 'leave/define', NULL, 'leave_parent', 1, 'menu-screen', NULL),
@@ -46,7 +88,7 @@ VALUES
 ('Handle leave request status', '/api/v1/leave/pending/:id/status', NULL, 'leave_parent', NULL, 'api', 'POST'),
 -- end leave
 
---start academics
+-- start academics
 ('Academics', 'academics_parent', 'academics.svg', NULL, 3, 'menu-screen', NULL),
 ('Classes', 'classes', NULL, 'academics_parent', 1, 'menu-screen', NULL),
 ('Class Teachers', 'class-teachers', NULL, 'academics_parent', 2, 'menu-screen', NULL),
@@ -70,7 +112,7 @@ VALUES
 ('Delete section', '/api/v1/sections/:id', NULL, 'academics_parent', NULL, 'api', 'DELETE'),
 -- end academics
 
---start student
+-- start student
 ('Students', 'students_parent', 'students.svg', NULL, 4, 'menu-screen', NULL),
 ('Student List', 'students', NULL, 'students_parent', 1, 'menu-screen', NULL),
 ('Add Student', 'students/add', NULL, 'students_parent', 2, 'menu-screen', NULL),
@@ -139,31 +181,3 @@ VALUES
 ('Get role users', '/api/v1/roles/:id/users', NULL, 'access_setting_parent', NULL, 'api', 'GET')
 -- end access setting
 ON CONFLICT DO NOTHING;
-
-ALTER SEQUENCE leave_status_id_seq RESTART WITH 1;
-INSERT INTO leave_status (name) VALUES
-('On Review'),
-('Approved'),
-('Cancelled');
-
-ALTER SEQUENCE roles_id_seq RESTART WITH 1;
-INSERT INTO roles (name, is_editable)
-VALUES ('Admin', false), ('Teacher', false), ('Student', false);
-
-ALTER SEQUENCE notice_status_id_seq RESTART WITH 1;
-INSERT INTO notice_status (name, alias)
-VALUES ('Draft', 'Draft'),
-('Submit for Review', 'Approval Pending'),
-('Submit for Deletion', 'Delete Pending'),
-('Reject', 'Rejected'),
-('Approve', 'Approved'),
-('Delete', 'Deleted');
-
-INSERT INTO users(name,email,role_id,created_dt,password, is_active, is_email_verified)
-VALUES('John Doe','admin@school-admin.com',1, now(),'$argon2id$v=19$m=65536,t=3,p=4$21a+bDbESEI60WO1wRKnvQ$i6OrxqNiHvwtf1Xg3bfU5+AXZG14fegW3p+RSMvq1oU', true, true)
-RETURNING id;
-
-INSERT INTO user_profiles
-(user_id, gender, marital_status, phone,dob,join_dt,qualification,experience,current_address,permanent_address,father_name,mother_name,emergency_phone)
-VALUES
-((SELECT currval('users_id_seq')),'Male','Married','4759746607','2024-08-05',NULL,NULL,NULL,NULL,NULL,'stut','lancy','79374304');

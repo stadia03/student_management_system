@@ -50,15 +50,27 @@ const addNewStudent = async (payload) => {
     }
 }
 
+// const findStudentToUpdate = async (payload) => {
+//     const { basicDetails: { name, email }, id } = payload;
+//     const currentDate = new Date();
+//     const query = `
+//         UPDATE users
+//         SET name = $1, email = $2, updated_dt = $3
+//         WHERE id = $4;
+//     `;
+//     const queryParams = [name, email, currentDate, id];
+//     const { rows } = await processDBRequest({ query, queryParams });
+//     return rows;
+// }
+
 const updateStudent = async (payload) => {
     const result = await addOrUpdateStudent(payload);
-    if (!result.status) {
-        throw new ApiError(500, result.message);
+   
+    if (!result || result.length === 0) {
+        throw new ApiError(500, "Unable to update student");
     }
-
-    return { message: result.message };
+    return { message: "Student updated successfully" };
 }
-
 const setStudentStatus = async ({ userId, reviewerId, status }) => {
     await checkStudentId(userId);
 

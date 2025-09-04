@@ -98,8 +98,8 @@ const findStudentToSetStatus = async ({ userId, reviewerId, status }) => {
     return rowCount
 }
 
-const findStudentToUpdate = async (paylaod) => {
-    const { basicDetails: { name, email }, id } = paylaod;
+const findStudentToUpdate = async (payload) => {
+    const { name, email, id } = payload;
     const currentDate = new Date();
     const query = `
         UPDATE users
@@ -108,8 +108,9 @@ const findStudentToUpdate = async (paylaod) => {
     `;
     const queryParams = [name, email, currentDate, id];
     const { rows } = await processDBRequest({ query, queryParams });
-    return rows;
+    return rows[0] || null;
 }
+
 
 module.exports = {
     getRoleId,
