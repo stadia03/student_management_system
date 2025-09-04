@@ -52,24 +52,6 @@ psql -d school_mgmt -f seed_db/tables.sql
 psql -d school_mgmt -f seed_db/seed-db.sql
 ```
 
-## 🎯 Skill Test Problems
-
-### **Problem 1: Frontend Developer Challenge**
-**Fix "Add New Notice" Page**
-
-- **Location**: `/app/notices/add`
-- **Issue**: When clicking the 'Save' button, the 'description' field doesn't get saved
-- **Skills Tested**: React, Form handling, State management, API integration
-- **Expected Fix**: Ensure description field is properly bound and submitted
-
-### **Problem 2: Backend Developer Challenge**
-**Complete CRUD Operations in Student Management**
-
-- **Location**: `/src/modules/students/students-controller.js`
-- **Issue**: Implement missing CRUD operations for student management
-- **Skills Tested**: Node.js, Express, PostgreSQL, API design
-- **Expected Implementation**: Full Create, Read, Update, Delete operations
-
 ## 🛠️ Technology Stack
 
 ### Frontend
